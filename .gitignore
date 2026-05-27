@@ -1,0 +1,15 @@
+node_modules/
+
+# snap runtime cache — never commit
+.snap/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

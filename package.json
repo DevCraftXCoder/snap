@@ -1,0 +1,38 @@
+{
+  "name": "claude-snap",
+  "version": "1.0.0",
+  "description": "Screenshot Vision + Visual Alias Manager for Claude Code — analyze Windows screenshots with native vision and correlate to repo source files",
+  "main": "snap-helper.cjs",
+  "scripts": {
+    "init": "node snap-helper.cjs init",
+    "pick": "node snap-helper.cjs pick",
+    "list": "node snap-helper.cjs list",
+    "clean": "node snap-helper.cjs clean",
+    "status": "node snap-helper.cjs cache-status"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "screenshot",
+    "vision",
+    "alias",
+    "ui-analysis",
+    "repo-correlation",
+    "windows",
+    "snipping-tool"
+  ],
+  "author": "DevCraftXCoder",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevCraftXCoder/claude-snap.git"
+  },
+  "homepage": "https://github.com/DevCraftXCoder/claude-snap#readme",
+  "bugs": {
+    "url": "https://github.com/DevCraftXCoder/claude-snap/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}
