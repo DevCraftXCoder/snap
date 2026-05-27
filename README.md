@@ -25,56 +25,66 @@ No external APIs. No cloud uploads. Pure local Node.js + Claude's built-in visio
   - Or use **`Win+PrtScn`** (always writes to disk)
   - `Win+Shift+S` (clipboard-only) does **not** work — it never writes to disk
 - **Claude Code** CLI with multimodal vision (claude-opus-4-7 or any Claude 3+ model)
-- **Node.js** ≥ 18 (no npm install needed — zero external dependencies)
+- **Node.js** ≥ 18 (no install needed — zero external dependencies)
 
 ---
 
 ## Installation
 
-### 1. Copy the skill file
-
-Place `snap.md` in your Claude Code project's commands directory:
+### 1. Copy the files
 
 ```
 your-project/
   .claude/
     commands/
-      snap.md       ← skill file
+      snap.md           ← skill file
     scripts/
-      snap-helper.cjs  ← FS engine
+      snap-helper.cjs   ← FS engine
 ```
 
-Or globally at `~/.claude/commands/snap.md` to use across all projects.
+Or place `snap.md` at `~/.claude/commands/snap.md` to use across all projects.
 
 ### 2. Update paths in `snap.md`
 
-The skill file references absolute paths. Find and replace:
+The skill file references absolute paths. Find and replace three values:
 
 | Placeholder | Replace with |
 |-------------|-------------|
-| `C:/Za/.claude/scripts/snap-helper.cjs` | Your absolute path to `snap-helper.cjs` |
-| `C:\Za\.snap\` | Your desired cache root (e.g. `C:\MyProject\.snap\`) |
-| `C:\Za\.claude\rules\project-aliases.md` | Your project aliases file path |
+| `C:/path/to/.claude/scripts/snap-helper.cjs` | Absolute path to your copy of `snap-helper.cjs` |
+| `C:\path\to\.snap\` | Desired cache root (e.g. `C:\MyProject\.snap\`) |
+| `C:\path\to\project-aliases.md` | Your project aliases file path |
 
-### 3. Add `.snap/` to your `.gitignore`
+### 3. Update search roots in `snap-helper.cjs`
+
+In `cmdCorrelateScope`, replace the default roots with your project's component/app directories:
+
+```js
+searchRoots: [
+  'C:/your-project/src/components/',
+  'C:/your-project/src/app/',
+  // add more as needed
+]
+```
+
+### 4. Add `.snap/` to your `.gitignore`
 
 ```gitignore
 # snap cache — runtime only, not committed
 .snap/
 ```
 
-### 4. Update your aliases file
+### 5. Update your aliases file
 
 Add this section to your `project-aliases.md` (or equivalent):
 
 ```markdown
 ## ! Visual Snapshots
 
-| Alias | Path | Description | Created |
-|-------|------|-------------|---------|
+| Alias | Analysis path | Created |
+|-------|---------------|---------|
 ```
 
-And add `! = visual snapshot` to your symbol legend.
+And add `` `!` = visual snapshot `` to your symbol legend.
 
 ---
 
@@ -136,28 +146,21 @@ Look at !LoginPage — the form labels are misaligned on mobile. Fix it.
 
 ## Repo Correlation
 
-The helper searches these roots by default (customize in `correlate-scope`):
+The helper searches your configured source roots for three signal types:
 
-- `francois-landing/components/`
-- `francois-landing/app/`
-- `packages/finos/apps/web/`
-- `EV Betta/ev-betta-ui/`
+| Signal | Confidence | How |
+|--------|-----------|-----|
+| Visible text strings | High (0.7–0.95) | Grep for button copy, labels, headings found verbatim |
+| Component names | Medium (0.4–0.7) | Grep for names implied by layout description |
+| Design tokens | Low (0.2–0.4) | Glob CSS files, grep for observed token values |
 
-**Update `cmdCorrelateScope` in `snap-helper.cjs`** to match your project structure.
-
-Confidence bands:
-
-| Band | Score | Signal |
-|------|-------|--------|
-| High | 0.7–0.95 | Visible text string found verbatim in file |
-| Medium | 0.4–0.7 | Component name implied by layout |
-| Low | 0.2–0.4 | Design token / CSS variable only |
+Update `cmdCorrelateScope` in `snap-helper.cjs` to point at your project's directories.
 
 ---
 
 ## Design Token Detection
 
-The skill recognizes these tokens out of the box:
+Built-in tokens (customize in `snap.md` Step 6):
 
 | Token | Meaning |
 |-------|---------|
@@ -166,10 +169,8 @@ The skill recognizes these tokens out of the box:
 | `Syne` | Heading font |
 | `DM Sans` | Body font |
 | `JetBrains Mono` | Code/mono font |
-| `--fin-cyan` | Finos design system |
-| `--ug-*` | Underground design pattern |
 
-Add your own in the `correlate` step of `snap.md`.
+Add your own design system tokens to the grep pass in Step 6c of `snap.md`.
 
 ---
 
@@ -221,7 +222,7 @@ All subcommands output a single JSON object to stdout. Errors use `{ ok: false, 
 
 Once registered, `!LoginPage` resolves automatically in any prompt:
 
-1. Claude checks `project-aliases.md` under `## ! Visual Snapshots`
+1. Claude checks your aliases file under `## ! Visual Snapshots`
 2. Reads `analysis.json` from the stored path
 3. Optionally re-reads `image.png` for fresh visual context
 
